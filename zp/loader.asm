@@ -1,22 +1,9 @@
-;/***************************************************
-;		版权声明
-;
-;	本操作系统名为：MINE
-;	该操作系统未经授权不得以盈利或非盈利为目的进行开发，
-;	只允许个人学习以及公开交流使用
-;
-;	代码最终所有权及解释权归田宇所有；
-;
-;	本模块作者：	田宇
-;	EMail:		345538255@qq.com
-;
-;
-;***************************************************/
+;loader
 
 org	0xb000
 jmp Label_Start
 
-%inclue "fat12.inc"
+%include "fat12.inc"
 
 [SECTION gdt]
 
@@ -55,7 +42,7 @@ Label_Start:
 	mov	sp,	0x7c00
 
 ;=======	display on screen : Start Loader......
-	mv bp, StartLoaderMessage
+	mov bp, StartLoaderMessage
 	call Func_Print_Message
 
 ;突破1MB地址限制
