@@ -113,6 +113,10 @@ Label_Find_End:
 
 ;=======	display messages
 
+PrintRow	db 0
+PrintCol	db 0
+PrintLastChar db 0
+
 StartLoaderMessage:	db	"Start Loader00"
 
 
