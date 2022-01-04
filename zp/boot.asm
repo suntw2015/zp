@@ -2,7 +2,9 @@
 org	0x7c00	
 
 BaseOfStack	equ	0x7c00
-AddressOfLoader equ 0xb000
+
+BaseOfLoader	equ	0x1000
+OffsetOfLoader	equ	0x00
 
 RootDirSectors	equ	14 ;目录占用的扇区数量 = 目录数量*结构体大小(32) / 每个扇区的字节数
 SectorNumOfRootDirStart	equ	19 ;目录起始的扇区
@@ -60,12 +62,6 @@ Label_Start:
 	mov bp, StartBootMessage
 	call Func_Print_Message
 
-;=======	reset floppy
-
-	; xor	ah,	ah
-	; xor	dl,	dl
-	; int	13h
-
 ;======= 开始读取fat12目录信息
 ;目录开始扇区SectorNumOfRootDirStart， 目录长度RootDirSectors
 mov bp, StartSearchLoader
@@ -104,11 +100,12 @@ Label_Search_File:
 	mov bp, SearchLoadFile
 	call Func_Print_Message
 	;文件的目录信息为  es:bx
-	;开始读取文件内容
-	mov si, AddressOfLoader
+	;开始读取文件内容 dx:si
+	mov dx, BaseOfLoader
+	mov si, OffsetOfLoader
 	call Func_Load_File
 
-	jmp AddressOfLoader
+	jmp BaseOfLoader: OffsetOfLoader
 
 Label_File_Not_Cmp:
 	;es:di要增加32
@@ -127,8 +124,9 @@ Label_Not_Found_Loader:
 
 ;加载文件内容
 ;文件的信息为 es:bx
-;加载到的位置为 es:si
+;加载到的位置为 dx:si
 Func_Load_File:
+	push es
 	push ax
 	push bx
 	push si
@@ -137,6 +135,7 @@ Func_Load_File:
 	mov ax, [es:bx]
 	cmp ax, 0
 	jz Label_Read_Finish ;文件起始簇为0
+	mov es, dx
 Label_Read_File_Content:
 	;开始读取
 	add ax, 31 ;转换簇号->扇区号 数据区起始簇号为 31 = 1引导 + 9*2 (FAT) + 14目录 - 2保留
@@ -159,6 +158,7 @@ Label_Read_Finish:
 	pop si
 	pop bx
 	pop ax
+	pop es
 	ret
 
 ;根据簇号获取下一个簇号
