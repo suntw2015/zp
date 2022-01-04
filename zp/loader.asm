@@ -354,7 +354,7 @@ Label_Find_End:
 
 ;=======	display messages
 
-PrintRow	db 0x0a
+PrintRow	db 10
 PrintCol	db 0
 PrintLastChar db 0
 KernelTmpFileOffset dd OffsetOfKernelFile
