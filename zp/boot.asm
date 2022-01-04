@@ -4,7 +4,7 @@ org	0x7c00
 BaseOfStack	equ	0x7c00
 
 BaseOfLoader	equ	0x1000
-OffsetOfLoader	equ	0x00
+OffsetOfLoader	equ	0x0000
 
 RootDirSectors	equ	14 ;目录占用的扇区数量 = 目录数量*结构体大小(32) / 每个扇区的字节数
 SectorNumOfRootDirStart	equ	19 ;目录起始的扇区
@@ -162,15 +162,19 @@ Label_Read_Finish:
 	ret
 
 ;根据簇号获取下一个簇号
-;https://www.eit.lth.se/fileadmin/eit/courses/eitn50/Literature/fat12_description.pdf fat cluster介绍
+;https://www.eit.lth.se/fileadmin/eit/courses/eitn50/Literature/fat12_description.pdf fat cluster介绍 使用小端模式
 ;入参
 ;ax 当前簇号
 ;出参
 ;ax
 Func_Get_Next_Clue:
+	push es
 	push bx
 	push dx
-	push ax
+	push ax	
+	;重置下es
+	mov ax, ds
+	mov es, ax
 	;读取fat1
 	mov ax, [BPB_FATSz16]
 	mov dx, 1 ;fat从第一个扇区开始
@@ -198,16 +202,17 @@ Func_Get_Next_Clue:
 	mov ah, [es:bx]
 	and ah, 0fh
 	jmp Label_Return
-;需要读一半一半	
+
 Label_Odd:
 	;If n is odd, then the physical location of the entry is the high four bits in location (3*n)/2 and the 8 bits in location 1+(3*n)/2 
-	mov ah, [es:bx]
-	shr ah, 4
-	inc bx
 	mov al, [es:bx]
+	inc bx
+	mov ah, [es:bx]
+	shr ax, 4
 Label_Return:
 	pop dx
 	pop bx
+	pop es
 	ret
 
 ;======= 读取扇区数据
