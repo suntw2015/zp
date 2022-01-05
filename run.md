@@ -13,6 +13,9 @@ dd if=user_program.bin of=test.vhd bs=512 count=2 seek=1 conv=notrunc
 nasm -f bin boot.asm -o boot.bin
 dd if=boot.bin of=/Users/suntianwen/Downloads/bochs-2.7/boot.img bs=512 count=1 conv=notrunc
 bochs -f ./.bochsrc
-mount -t vfat -o loop /root/boot.img /mnt/asm
-scp root@10.26.15.86:/root/boot.img /Users/suntianwen/Downloads/bochs-2.7/boot.img
+mount -t vfat -o loop,sync /root/boot.img /mnt/asm
+scp root@10.26.15.86:/root/boot.img /Users/suntianwen/Downloads/bochs-2.7
+
+scp loader.bin root@10.26.15.86:/root
+scp /Users/suntianwen/Downloads/bochs-2.7/boot.img root@10.26.15.86:/root/boot.img
 ```

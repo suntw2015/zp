@@ -159,7 +159,7 @@ Label_Kernel_Mov_Success:
 
 	mov si, OffsetTmpOfKernelFile
 	call Func_Print_Message
-	
+
 	jmp $
 
 Label_File_Not_Cmp:
@@ -239,8 +239,8 @@ Func_Get_Next_Clue:
 
 	;每一个簇在fat1表中占12bit, 1.5byte
 	pop ax
-	mov bl, 3
-	mul bl
+	mov bx, 3
+	mul bx
 	;dx保存 奇偶标志 0偶数 1基数
 	mov dx, ax	
 	and dx, 1
