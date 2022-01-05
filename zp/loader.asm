@@ -1,6 +1,6 @@
 ;loader
 
-org	0x10000
+org	10000h
 jmp Label_Start
 
 %include "fat12.inc"
@@ -14,7 +14,6 @@ OffsetTmpOfKernelFile	equ	0x7E00
 MemoryStructBufferAddr	equ	0x7E00
 
 [SECTION gdt]
-
 LABEL_GDT:		dd	0,0
 LABEL_DESC_CODE32:	dd	0x0000FFFF,0x00CF9A00
 LABEL_DESC_DATA32:	dd	0x0000FFFF,0x00CF9200
@@ -39,8 +38,8 @@ GdtPtr64	dw	GdtLen64 - 1
 SelectorCode64	equ	LABEL_DESC_CODE64 - LABEL_GDT64
 SelectorData64	equ	LABEL_DESC_DATA64 - LABEL_GDT64
 
-[section .s16]
-[bits 16]
+[SECTION .s16]
+[BITS 16]
 Label_Start:
 	mov	ax,	cs
 	mov	ds,	ax
@@ -74,12 +73,9 @@ Label_Start:
 	mov	cr0,	eax
 
 	sti
-	jmp	$
 
 ;======= 开始读取fat12目录信息
 ;目录开始扇区SectorNumOfRootDirStart， 目录长度RootDirSectors
-mov bp, StartSearchKernel
-call Func_Print_Message
 
 Label_Begion_Read_Root_Dir:
 	;读取目录信息
@@ -88,6 +84,9 @@ Label_Begion_Read_Root_Dir:
 	mov dx, SectorNumOfRootDirStart
 	mov bx, 2000h
 	call Func_Read_Sector_Data
+
+	mov bp, StartSearchKernel
+	call Func_Print_Message
 	
 	;从es:bx处开始对比
 	mov bx, 2000h
@@ -113,10 +112,13 @@ Label_Search_File:
 	;找到文件了
 	mov bp, SearchedKernelFile
 	call Func_Print_Message
+	mov bp, SearchedKernelFile
 	;文件的目录信息为  es:bx ，文件大小为es:bx+0x1c 4个字节
 	;开始读取文件内容 dx:si
 	mov dx, BaseTmpOfKernelAddr
 	mov si, OffsetTmpOfKernelFile
+	call Func_Print_Message
+	
 	call Func_Load_File
 
 	;kernel读取到临时空间了, 迁移kernel到1MB以上的空间
@@ -154,6 +156,10 @@ Label_Kernel_Mov_Success:
 	mov	ah, 0Fh				; 0000: 黑底    1111: 白字
 	mov	al, 'G'
 	mov	[gs:((80 * 0 + 39) * 2)], ax	; 屏幕第 0 行, 第 39 列。
+
+	mov si, OffsetTmpOfKernelFile
+	call Func_Print_Message
+	
 	jmp $
 
 Label_File_Not_Cmp:
@@ -197,6 +203,7 @@ Label_Read_File_Content:
 	mov ax, dx
 	sub ax, 31 ;减掉扇区逻辑
 	call Func_Get_Next_Clue
+	
 	cmp ax, 0fffh
 	jz Label_Read_Finish
 	;没有读完
@@ -222,7 +229,7 @@ Func_Get_Next_Clue:
 	push dx
 	push ax	
 	;重置下es
-	mov ax, ds
+	mov ax, 0
 	mov es, ax
 	;读取fat1
 	mov ax, [BPB_FATSz16]
@@ -356,7 +363,6 @@ Label_Find_End:
 	pop ax
 	pop dx
 	ret
-
 ;=======	display messages
 
 PrintRow	db 0x07
@@ -368,4 +374,4 @@ StartLoaderMessage:	db	"Start Loader00"
 KernelFileName: db "KERNEL  BIN"
 StartSearchKernel: db "Start Search Kernel00"
 NoKernelMessage:	db	"No Kernel00"
-SearchedKernelFile: db "find kernel00"
+SearchedKernelFile: db "find kernel1100"

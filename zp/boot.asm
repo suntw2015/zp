@@ -105,7 +105,9 @@ Label_Search_File:
 	mov si, OffsetOfLoader
 	call Func_Load_File
 
-	jmp BaseOfLoader: OffsetOfLoader
+	mov bp, SearchLoadFile
+	call Func_Print_Message
+	jmp BaseOfLoader:OffsetOfLoader
 
 Label_File_Not_Cmp:
 	;es:di要增加32
@@ -148,6 +150,7 @@ Label_Read_File_Content:
 	mov ax, dx
 	sub ax, 31 ;减掉扇区逻辑
 	call Func_Get_Next_Clue
+
 	cmp ax, 0fffh
 	jz Label_Read_Finish
 	;没有读完
