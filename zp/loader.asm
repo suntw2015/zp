@@ -112,12 +112,10 @@ Label_Search_File:
 	;找到文件了
 	mov bp, SearchedKernelFile
 	call Func_Print_Message
-	mov bp, SearchedKernelFile
 	;文件的目录信息为  es:bx ，文件大小为es:bx+0x1c 4个字节
 	;开始读取文件内容 dx:si
 	mov dx, BaseTmpOfKernelAddr
 	mov si, OffsetTmpOfKernelFile
-	call Func_Print_Message
 	
 	call Func_Load_File
 
@@ -157,11 +155,259 @@ Label_Kernel_Mov_Success:
 	mov	al, 'G'
 	mov	[gs:((80 * 0 + 39) * 2)], ax	; 屏幕第 0 行, 第 39 列。
 
-	mov si, OffsetTmpOfKernelFile
+	mov bp, SearchedKernelFile
 	call Func_Print_Message
 
+;=======	获取内存信息
+	mov	bp,	StartGetMemStructMessage
+	call Func_Print_Message
+	push es
+	mov	ebx,	0
+	mov	ax,	0x00
+	mov	es,	ax
+	mov	di,	MemoryStructBufferAddr	
+
+Label_Get_Mem_Struct:
+
+	mov	eax,	0x0E820
+	mov	ecx,	20
+	mov	edx,	0x534D4150
+	int	15h
+	jc	Label_Get_Mem_Fail
+	add	di,	20
+
+	cmp	ebx,	0
+	jne	Label_Get_Mem_Struct
+	jmp	Label_Get_Mem_OK
+
+Label_Get_Mem_Fail:
+	pop es
+	mov	bp,	GetMemStructErrMessage
+	call Func_Print_Message
+	jmp	$
+
+Label_Get_Mem_OK:
+	pop es
+	mov	bp,	GetMemStructOKMessage
+	call Func_Print_Message
+
+;=======	获取SVGA显示信息
+	mov	bp,	StartGetSVGAVBEInfoMessage
+	call Func_Print_Message
+
+	push es
+	mov	ax,	0x00
+	mov	es,	ax
+	mov	di,	0x8000
+	mov	ax,	4F00h
+
+	int	10h
+
+	pop es
+	cmp	ax,	004Fh
+
+	jz	.KO
+	
+;=======	Fail
+	mov	bp,	GetSVGAVBEInfoErrMessage
+	call Func_Print_Message
+
+	jmp	$
+
+.KO:
+	mov	bp,	GetSVGAVBEInfoOKMessage
+	call Func_Print_Message
+
+;=======	Get SVGA Mode Info
+	mov	bp,	StartGetSVGAModeInfoMessage
+	call Func_Print_Message
+
+	push es
+	mov	ax,	0x00
+	mov	es,	ax
+	mov	si,	0x800e
+
+	mov	esi,	dword	[es:si]
+	mov	edi,	0x8200
+
+Label_SVGA_Mode_Info_Get:
+
+	mov	cx,	word	[es:esi]
+
+;=======	display SVGA mode information
+
+	push	ax
+	
+	mov	ax,	00h
+	mov	al,	ch
+	call	Label_DispAL
+
+	mov	ax,	00h
+	mov	al,	cl	
+	call	Label_DispAL
+	
+	pop	ax
+
+;=======
+	
+	cmp	cx,	0FFFFh
+	jz	Label_SVGA_Mode_Info_Finish
+
+	mov	ax,	4F01h
+	int	10h
+
+	cmp	ax,	004Fh
+
+	jnz	Label_SVGA_Mode_Info_FAIL	
+
+	add	esi,	2
+	add	edi,	0x100
+
+	jmp	Label_SVGA_Mode_Info_Get
+		
+Label_SVGA_Mode_Info_FAIL:
+	pop es
+	mov	bp,	GetSVGAModeInfoErrMessage
+	call Func_Print_Message
+
+Label_SET_SVGA_Mode_VESA_VBE_FAIL:
+	pop es
 	jmp $
 
+Label_SVGA_Mode_Info_Finish:
+	pop es
+	mov	bp,	GetSVGAModeInfoOKMessage
+	call Func_Print_Message
+
+;=======	set the SVGA mode(VESA VBE)
+
+	mov	ax,	4F02h
+	mov	bx,	4180h	;========================mode : 0x180 or 0x143
+	int 	10h
+
+	cmp	ax,	004Fh
+	jnz	Label_SET_SVGA_Mode_VESA_VBE_FAIL
+
+;=======	init IDT GDT goto protect mode 
+
+	cli			;======close interrupt
+
+	db	0x66
+	lgdt	[GdtPtr]
+
+;	db	0x66
+;	lidt	[IDT_POINTER]
+
+	mov	eax,	cr0
+	or	eax,	1
+	mov	cr0,	eax	
+
+	jmp	dword SelectorCode32:GO_TO_TMP_Protect
+
+[SECTION .s32]
+[BITS 32]
+
+GO_TO_TMP_Protect:
+
+;=======	go to tmp long mode
+
+	mov	ax,	0x10
+	mov	ds,	ax
+	mov	es,	ax
+	mov	fs,	ax
+	mov	ss,	ax
+	mov	esp,	7E00h
+
+	call	support_long_mode
+	test	eax,	eax
+
+	jz	no_support
+
+;=======	init temporary page table 0x90000
+
+	mov	dword	[0x90000],	0x91007
+	mov	dword	[0x90800],	0x91007		
+
+	mov	dword	[0x91000],	0x92007
+
+	mov	dword	[0x92000],	0x000083
+
+	mov	dword	[0x92008],	0x200083
+
+	mov	dword	[0x92010],	0x400083
+
+	mov	dword	[0x92018],	0x600083
+
+	mov	dword	[0x92020],	0x800083
+
+	mov	dword	[0x92028],	0xa00083
+
+;=======	load GDTR
+
+	db	0x66
+	lgdt	[GdtPtr64]
+	mov	ax,	0x10
+	mov	ds,	ax
+	mov	es,	ax
+	mov	fs,	ax
+	mov	gs,	ax
+	mov	ss,	ax
+
+	mov	esp,	7E00h
+
+;=======	open PAE
+
+	mov	eax,	cr4
+	bts	eax,	5
+	mov	cr4,	eax
+
+;=======	load	cr3
+
+	mov	eax,	0x90000
+	mov	cr3,	eax
+
+;=======	enable long-mode
+
+	mov	ecx,	0C0000080h		;IA32_EFER
+	rdmsr
+
+	bts	eax,	8
+	wrmsr
+
+;=======	open PE and paging
+
+	mov	eax,	cr0
+	bts	eax,	0
+	bts	eax,	31
+	mov	cr0,	eax
+
+	jmp	SelectorCode64:OffsetOfKernelFile
+
+;=======	test support long mode or not
+
+support_long_mode:
+
+	mov	eax,	0x80000000
+	cpuid
+	cmp	eax,	0x80000001
+	setnb	al	
+	jb	support_long_mode_done
+	mov	eax,	0x80000001
+	cpuid
+	bt	edx,	29
+	setc	al
+support_long_mode_done:
+	
+	movzx	eax,	al
+	ret
+
+;=======	no support
+
+no_support:
+	jmp	$
+
+[SECTION .s16lib]
+[BITS 16]
 Label_File_Not_Cmp:
 	;es:di要增加32
 	;剩余目录数减1
@@ -363,15 +609,76 @@ Label_Find_End:
 	pop ax
 	pop dx
 	ret
-;=======	display messages
+;=======	display num in al
+
+Label_DispAL:
+
+	push	ecx
+	push	edx
+	push	edi
+	
+	mov	edi,	[DisplayPosition]
+	mov	ah,	0Fh
+	mov	dl,	al
+	shr	al,	4
+	mov	ecx,	2
+.begin:
+
+	and	al,	0Fh
+	cmp	al,	9
+	ja	.1
+	add	al,	'0'
+	jmp	.2
+.1:
+
+	sub	al,	0Ah
+	add	al,	'A'
+.2:
+
+	mov	[gs:edi],	ax
+	add	edi,	2
+	
+	mov	al,	dl
+	loop	.begin
+
+	mov	[DisplayPosition],	edi
+
+	pop	edi
+	pop	edx
+	pop	ecx
+	
+	ret
+
+;=======	tmp IDT
+
+IDT:
+	times	0x50	dq	0
+IDT_END:
+
+IDT_POINTER:
+		dw	IDT_END - IDT - 1
+		dd	IDT
 
 PrintRow	db 0x07
 PrintCol	db 0
 PrintLastChar db 0
 KernelTmpFileOffset dd OffsetOfKernelFile
+DisplayPosition		dd	0
 
+;=======	display messages
 StartLoaderMessage:	db	"Start Loader00"
 KernelFileName: db "KERNEL  BIN"
 StartSearchKernel: db "Start Search Kernel00"
 NoKernelMessage:	db	"No Kernel00"
 SearchedKernelFile: db "find kernel1100"
+StartGetMemStructMessage:	db	"Start Get Memory Struct00"
+GetMemStructErrMessage:	db	"Get Memory Struct ERROR00"
+GetMemStructOKMessage:	db	"Get Memory Struct SUCCESSFUL00"
+
+StartGetSVGAVBEInfoMessage:	db	"Start Get SVGA VBE Info00"
+GetSVGAVBEInfoErrMessage:	db	"Get SVGA VBE Info ERROR00"
+GetSVGAVBEInfoOKMessage:	db	"Get SVGA VBE Info SUCCESSFUL00"
+
+StartGetSVGAModeInfoMessage:	db	"Start Get SVGA Mode Info00"
+GetSVGAModeInfoErrMessage:	db	"Get SVGA Mode Info ERROR00"
+GetSVGAModeInfoOKMessage:	db	"Get SVGA Mode Info SUCCESSFUL00"
