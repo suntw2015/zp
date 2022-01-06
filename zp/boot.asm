@@ -145,7 +145,6 @@ Label_Read_File_Content:
 	mov al, 1
 	mov bx, si
 	call Func_Read_Sector_Data
-
 	;获取下一个簇号
 	mov ax, dx
 	sub ax, 31 ;减掉扇区逻辑
@@ -176,18 +175,24 @@ Func_Get_Next_Clue:
 	push dx
 	push ax	
 	;重置下es
-	mov ax, ds
+	mov ax, 0
 	mov es, ax
+
+	mov al, [ReadFat]
+	cmp al, 0
+	jnz Label_Read_Fat_Finish
+	mov byte [ReadFat], 1
 	;读取fat1
 	mov ax, [BPB_FATSz16]
 	mov dx, 1 ;fat从第一个扇区开始
 	mov bx, 9000h
 	call Func_Read_Sector_Data
 
+Label_Read_Fat_Finish:
 	;每一个簇在fat1表中占12bit, 1.5byte
 	pop ax
-	mov bl, 3
-	mul bl
+	mov bx, 3
+	mul bx
 	;dx保存 奇偶标志 0偶数 1基数
 	mov dx, ax	
 	and dx, 1
@@ -318,6 +323,8 @@ SectorNo		dw	0
 PrintRow	db 0
 PrintCol	db 0
 PrintLastChar db 0
+
+ReadFat db 0
 
 ;=======	display messages
 

@@ -17,5 +17,6 @@ mount -t vfat -o loop,sync /root/boot.img /mnt/asm
 scp root@10.26.15.86:/root/boot.img /Users/suntianwen/Downloads/bochs-2.7
 
 scp loader.bin root@10.26.15.86:/root
-scp /Users/suntianwen/Downloads/bochs-2.7/boot.img root@10.26.15.86:/root/boot.img
+scp /Users/suntianwen/Downloads/bochs-2.7/boot.img root@10.26.15.86:/root/
+https://www.cs.virginia.edu/~cr4bd/4414/F2018/files/fatspec.pdf
 ```
