@@ -302,7 +302,8 @@ Label_SVGA_Mode_Info_Finish:
 	or	eax,	1
 	mov	cr0,	eax	
 
-	jmp	dword SelectorCode32:GO_TO_TMP_Protect
+	; jmp	dword SelectorCode32:GO_TO_TMP_Protect
+	jmp	GO_TO_TMP_Protect
 
 [SECTION .s32]
 [BITS 32]
@@ -317,10 +318,9 @@ GO_TO_TMP_Protect:
 	mov	fs,	ax
 	mov	ss,	ax
 	mov	esp,	7E00h
-
+	jmp $
 	call	support_long_mode
 	test	eax,	eax
-
 	jz	no_support
 
 ;=======	init temporary page table 0x90000
