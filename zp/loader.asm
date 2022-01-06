@@ -1,9 +1,22 @@
-;loader
+;/***************************************************
+;		版权声明
+;
+;	本操作系统名为：MINE
+;	该操作系统未经授权不得以盈利或非盈利为目的进行开发，
+;	只允许个人学习以及公开交流使用
+;
+;	代码最终所有权及解释权归田宇所有；
+;
+;	本模块作者：	田宇
+;	EMail:		345538255@qq.com
+;
+;
+;***************************************************/
 
 org	10000h
-jmp Label_Start
+	jmp	Label_Start
 
-%include "fat12.inc"
+%include	"fat12.inc"
 
 BaseOfKernelFile	equ	0x00
 OffsetOfKernelFile	equ	0x100000
@@ -14,13 +27,14 @@ OffsetTmpOfKernelFile	equ	0x7E00
 MemoryStructBufferAddr	equ	0x7E00
 
 [SECTION gdt]
+
 LABEL_GDT:		dd	0,0
 LABEL_DESC_CODE32:	dd	0x0000FFFF,0x00CF9A00
 LABEL_DESC_DATA32:	dd	0x0000FFFF,0x00CF9200
 
 GdtLen	equ	$ - LABEL_GDT
 GdtPtr	dw	GdtLen - 1
-	dd	LABEL_GDT
+	dd	LABEL_GDT	;be carefull the address(after use org)!!!!!!
 
 SelectorCode32	equ	LABEL_DESC_CODE32 - LABEL_GDT
 SelectorData32	equ	LABEL_DESC_DATA32 - LABEL_GDT
@@ -40,7 +54,9 @@ SelectorData64	equ	LABEL_DESC_DATA64 - LABEL_GDT64
 
 [SECTION .s16]
 [BITS 16]
+
 Label_Start:
+
 	mov	ax,	cs
 	mov	ds,	ax
 	mov	es,	ax
@@ -49,18 +65,28 @@ Label_Start:
 	mov	sp,	0x7c00
 
 ;=======	display on screen : Start Loader......
-	mov bp, StartLoaderMessage
-	call Func_Print_Message
 
-;突破1MB地址限制
-	push ax
-	in al, 92h
-	or al, 00000010b
-	out 92h, al
-	pop ax
+	mov	ax,	1301h
+	mov	bx,	000fh
+	mov	dx,	0200h		;row 2
+	mov	cx,	12
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
+	mov	bp,	StartLoaderMessage
+	int	10h
+
+;=======	open address A20
+	push	ax
+	in	al,	92h
+	or	al,	00000010b
+	out	92h,	al
+	pop	ax
 
 	cli
-	lgdt [GdtPtr]
+
+	lgdt	[GdtPtr]	
 
 	mov	eax,	cr0
 	or	eax,	1
@@ -74,72 +100,141 @@ Label_Start:
 
 	sti
 
-;======= 开始读取fat12目录信息
-;目录开始扇区SectorNumOfRootDirStart， 目录长度RootDirSectors
+;=======	reset floppy
 
-Label_Begion_Read_Root_Dir:
-	;读取目录信息
-	mov ax, 0
-	mov al, RootDirSectors
-	mov dx, SectorNumOfRootDirStart
-	mov bx, 2000h
-	call Func_Read_Sector_Data
+	xor	ah,	ah
+	xor	dl,	dl
+	int	13h
 
-	mov bp, StartSearchKernel
-	call Func_Print_Message
+;=======	search kernel.bin
+	mov	word	[SectorNo],	SectorNumOfRootDirStart
+
+Lable_Search_In_Root_Dir_Begin:
+
+	cmp	word	[RootDirSizeForLoop],	0
+	jz	Label_No_LoaderBin
+	dec	word	[RootDirSizeForLoop]	
+	mov	ax,	00h
+	mov	es,	ax
+	mov	bx,	8000h
+	mov	ax,	[SectorNo]
+	mov	cl,	1
+	call	Func_ReadOneSector
+	mov	si,	KernelFileName
+	mov	di,	8000h
+	cld
+	mov	dx,	10h
 	
-	;从es:bx处开始对比
-	mov bx, 2000h
-	;总目录数 [BPB_RootEntCnt]
-	mov ax, [BPB_RootEntCnt]
+Label_Search_For_LoaderBin:
 
-Label_Read_Root_Dir:
-	mov si, bx
-	;bp为要搜索的文件，dx为文件长度
-	mov bp, KernelFileName
-	mov cx, 11
+	cmp	dx,	0
+	jz	Label_Goto_Next_Sector_In_Root_Dir
+	dec	dx
+	mov	cx,	11
 
-Label_Search_File:
-	mov dl, [es:si]
-	;es:di 和 bp比对，长度为 dx
-	cmp dl, [es:bp]
-	jnz Label_File_Not_Cmp
-	inc si
-	inc bp
-	dec cx
-	cmp cx, 0
-	jnz Label_Search_File
-	;找到文件了
-	mov bp, SearchedKernelFile
-	call Func_Print_Message
-	;文件的目录信息为  es:bx ，文件大小为es:bx+0x1c 4个字节
-	;开始读取文件内容 dx:si
-	mov dx, BaseTmpOfKernelAddr
-	mov si, OffsetTmpOfKernelFile
+Label_Cmp_FileName:
+
+	cmp	cx,	0
+	jz	Label_FileName_Found
+	dec	cx
+	lodsb	
+	cmp	al,	byte	[es:di]
+	jz	Label_Go_On
+	jmp	Label_Different
+
+Label_Go_On:
 	
-	call Func_Load_File
+	inc	di
+	jmp	Label_Cmp_FileName
 
-	;kernel读取到临时空间了, 迁移kernel到1MB以上的空间
-	push cx
-	push eax
-	push fs
-	push edi
-	push ds
-	push esi
-	;BaseTmpOfKernelAddr:OffsetTmpOfKernelFile 到 BaseOfKernelFile : OffsetOfKernelFile
-	;获取kernel文件大小
-	add bx, 0x1c
-	mov ecx, [es:bx]
-	mov ax, BaseTmpOfKernelAddr
-	mov ds, ax
-	mov esi, OffsetTmpOfKernelFile
-	;KernelTmpFileOffset
-Label_Mov_Kernel:
-	mov al, [ds:esi]
-	mov byte [fs:edi], al
-	inc esi
-	inc edi
-	loop Label_Mov_Kernel
+Label_Different:
+
+	and	di,	0FFE0h
+	add	di,	20h
+	mov	si,	KernelFileName
+	jmp	Label_Search_For_LoaderBin
+
+Label_Goto_Next_Sector_In_Root_Dir:
+	
+	add	word	[SectorNo],	1
+	jmp	Lable_Search_In_Root_Dir_Begin
+	
+;=======	display on screen : ERROR:No KERNEL Found
+
+Label_No_LoaderBin:
+
+	mov	ax,	1301h
+	mov	bx,	008Ch
+	mov	dx,	0300h		;row 3
+	mov	cx,	21
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
+	mov	bp,	NoLoaderMessage
+	int	10h
+	jmp	$
+
+;=======	found loader.bin name in root director struct
+
+Label_FileName_Found:
+	mov	ax,	RootDirSectors
+	and	di,	0FFE0h
+	add	di,	01Ah
+	mov	cx,	word	[es:di]
+	push	cx
+	add	cx,	ax
+	add	cx,	SectorBalance
+	mov	eax,	BaseTmpOfKernelAddr;BaseOfKernelFile
+	mov	es,	eax
+	mov	bx,	OffsetTmpOfKernelFile;OffsetOfKernelFile
+	mov	ax,	cx
+
+Label_Go_On_Loading_File:
+	push	ax
+	push	bx
+	mov	ah,	0Eh
+	mov	al,	'.'
+	mov	bl,	0Fh
+	int	10h
+	pop	bx
+	pop	ax
+
+	mov	cl,	1
+	call	Func_ReadOneSector
+	pop	ax
+
+;;;;;;;;;;;;;;;;;;;;;;;	
+	push	cx
+	push	eax
+	push	fs
+	push	edi
+	push	ds
+	push	esi
+
+	mov	cx,	200h
+	mov	ax,	BaseOfKernelFile
+	mov	fs,	ax
+	mov	edi,	dword	[OffsetOfKernelFileCount]
+
+	mov	ax,	BaseTmpOfKernelAddr
+	mov	ds,	ax
+	mov	esi,	OffsetTmpOfKernelFile
+
+Label_Mov_Kernel:	;------------------
+	
+	mov	al,	byte	[ds:esi]
+	mov	byte	[fs:edi],	al
+
+	inc	esi
+	inc	edi
+
+	loop	Label_Mov_Kernel
+
+	mov	eax,	0x1000
+	mov	ds,	eax
+
+	mov	dword	[OffsetOfKernelFileCount],	edi
 
 	pop	esi
 	pop	ds
@@ -147,21 +242,48 @@ Label_Mov_Kernel:
 	pop	fs
 	pop	eax
 	pop	cx
+;;;;;;;;;;;;;;;;;;;;;;;	
 
-Label_Kernel_Mov_Success:
+	call	Func_GetFATEntry
+	cmp	ax,	0FFFh
+	jz	Label_File_Loaded
+	push	ax
+	mov	dx,	RootDirSectors
+	add	ax,	dx
+	add	ax,	SectorBalance
+;	add	bx,	[BPB_BytesPerSec]	
+
+	jmp	Label_Go_On_Loading_File
+
+Label_File_Loaded:
+		
 	mov	ax, 0B800h
 	mov	gs, ax
 	mov	ah, 0Fh				; 0000: 黑底    1111: 白字
 	mov	al, 'G'
 	mov	[gs:((80 * 0 + 39) * 2)], ax	; 屏幕第 0 行, 第 39 列。
 
-	mov bp, SearchedKernelFile
-	call Func_Print_Message
+KillMotor:
+	
+	push	dx
+	mov	dx,	03F2h
+	mov	al,	0	
+	out	dx,	al
+	pop	dx
 
-;=======	获取内存信息
+;=======	get memory address size type
+
+	mov	ax,	1301h
+	mov	bx,	000Fh
+	mov	dx,	0400h		;row 4
+	mov	cx,	44
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	StartGetMemStructMessage
-	call Func_Print_Message
-	push es
+	int	10h
+
 	mov	ebx,	0
 	mov	ax,	0x00
 	mov	es,	ax
@@ -175,27 +297,53 @@ Label_Get_Mem_Struct:
 	int	15h
 	jc	Label_Get_Mem_Fail
 	add	di,	20
+	inc	dword	[MemStructNumber]
 
 	cmp	ebx,	0
 	jne	Label_Get_Mem_Struct
 	jmp	Label_Get_Mem_OK
 
 Label_Get_Mem_Fail:
-	pop es
+
+	mov	dword	[MemStructNumber],	0
+
+	mov	ax,	1301h
+	mov	bx,	008Ch
+	mov	dx,	0500h		;row 5
+	mov	cx,	23
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	GetMemStructErrMessage
-	call Func_Print_Message
-	jmp	$
+	int	10h
 
 Label_Get_Mem_OK:
-	pop es
+	
+	mov	ax,	1301h
+	mov	bx,	000Fh
+	mov	dx,	0600h		;row 6
+	mov	cx,	29
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	GetMemStructOKMessage
-	call Func_Print_Message
+	int	10h	
 
-;=======	获取SVGA显示信息
+;=======	get SVGA information
+
+	mov	ax,	1301h
+	mov	bx,	000Fh
+	mov	dx,	0800h		;row 8
+	mov	cx,	23
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	StartGetSVGAVBEInfoMessage
-	call Func_Print_Message
+	int	10h
 
-	push es
 	mov	ax,	0x00
 	mov	es,	ax
 	mov	di,	0x8000
@@ -203,26 +351,52 @@ Label_Get_Mem_OK:
 
 	int	10h
 
-	pop es
 	cmp	ax,	004Fh
 
 	jz	.KO
 	
 ;=======	Fail
+
+	mov	ax,	1301h
+	mov	bx,	008Ch
+	mov	dx,	0900h		;row 9
+	mov	cx,	23
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	GetSVGAVBEInfoErrMessage
-	call Func_Print_Message
+	int	10h
 
 	jmp	$
 
 .KO:
+
+	mov	ax,	1301h
+	mov	bx,	000Fh
+	mov	dx,	0A00h		;row 10
+	mov	cx,	29
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	GetSVGAVBEInfoOKMessage
-	call Func_Print_Message
+	int	10h
 
 ;=======	Get SVGA Mode Info
-	mov	bp,	StartGetSVGAModeInfoMessage
-	call Func_Print_Message
 
-	push es
+	mov	ax,	1301h
+	mov	bx,	000Fh
+	mov	dx,	0C00h		;row 12
+	mov	cx,	24
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
+	mov	bp,	StartGetSVGAModeInfoMessage
+	int	10h
+
+
 	mov	ax,	0x00
 	mov	es,	ax
 	mov	si,	0x800e
@@ -260,24 +434,41 @@ Label_SVGA_Mode_Info_Get:
 
 	jnz	Label_SVGA_Mode_Info_FAIL	
 
+	inc	dword		[SVGAModeCounter]
 	add	esi,	2
 	add	edi,	0x100
 
 	jmp	Label_SVGA_Mode_Info_Get
 		
 Label_SVGA_Mode_Info_FAIL:
-	pop es
+
+	mov	ax,	1301h
+	mov	bx,	008Ch
+	mov	dx,	0D00h		;row 13
+	mov	cx,	24
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	GetSVGAModeInfoErrMessage
-	call Func_Print_Message
+	int	10h
 
 Label_SET_SVGA_Mode_VESA_VBE_FAIL:
-	pop es
-	jmp $
+
+	jmp	$
 
 Label_SVGA_Mode_Info_Finish:
-	pop es
+
+	mov	ax,	1301h
+	mov	bx,	000Fh
+	mov	dx,	0E00h		;row 14
+	mov	cx,	30
+	push	ax
+	mov	ax,	ds
+	mov	es,	ax
+	pop	ax
 	mov	bp,	GetSVGAModeInfoOKMessage
-	call Func_Print_Message
+	int	10h
 
 ;=======	set the SVGA mode(VESA VBE)
 
@@ -292,18 +483,15 @@ Label_SVGA_Mode_Info_Finish:
 
 	cli			;======close interrupt
 
-	db	0x66
 	lgdt	[GdtPtr]
 
-;	db	0x66
 ;	lidt	[IDT_POINTER]
 
 	mov	eax,	cr0
 	or	eax,	1
 	mov	cr0,	eax	
 
-	; jmp	dword SelectorCode32:GO_TO_TMP_Protect
-	jmp	GO_TO_TMP_Protect
+	jmp	dword SelectorCode32:GO_TO_TMP_Protect
 
 [SECTION .s32]
 [BITS 32]
@@ -318,9 +506,10 @@ GO_TO_TMP_Protect:
 	mov	fs,	ax
 	mov	ss,	ax
 	mov	esp,	7E00h
-	jmp $
+	
 	call	support_long_mode
 	test	eax,	eax
+
 	jz	no_support
 
 ;=======	init temporary page table 0x90000
@@ -341,10 +530,9 @@ GO_TO_TMP_Protect:
 	mov	dword	[0x92020],	0x800083
 
 	mov	dword	[0x92028],	0xa00083
-
+	
 ;=======	load GDTR
-
-	db	0x66
+	
 	lgdt	[GdtPtr64]
 	mov	ax,	0x10
 	mov	ds,	ax
@@ -354,7 +542,7 @@ GO_TO_TMP_Protect:
 	mov	ss,	ax
 
 	mov	esp,	7E00h
-
+	
 ;=======	open PAE
 
 	mov	eax,	cr4
@@ -406,209 +594,80 @@ support_long_mode_done:
 no_support:
 	jmp	$
 
-[SECTION .s16lib]
+;=======	read one sector from floppy
+
+[SECTION .s116]
 [BITS 16]
-Label_File_Not_Cmp:
-	;es:di要增加32
-	;剩余目录数减1
-	add bx, 20h
-	dec ax
 
-	;如果目录都读完了，那就是没有这个文件
-	cmp ax, 0
-	jnz Label_Read_Root_Dir
-;没有找到loader
-Label_Not_Found_Loader:
-	mov bp, NoKernelMessage
-	call Func_Print_Message
-	jmp	$
-
-;加载文件内容
-;文件的信息为 es:bx
-;加载到的位置为 dx:si
-Func_Load_File:
-	push es
-	push ax
-	push bx
-	push si
-	;获取文件起始的簇号
-	add bx, 1ah ;DIR_FstClus
-	mov ax, [es:bx]
-	cmp ax, 0
-	jz Label_Read_Finish ;文件起始簇为0
-	mov es, dx
-Label_Read_File_Content:
-	;开始读取
-	add ax, 31 ;转换簇号->扇区号 数据区起始簇号为 31 = 1引导 + 9*2 (FAT) + 14目录 - 2保留
-	mov dx, ax
-	mov al, 1
-	mov bx, si
-	call Func_Read_Sector_Data
-
-	;获取下一个簇号
-	mov ax, dx
-	sub ax, 31 ;减掉扇区逻辑
-	call Func_Get_Next_Clue
+Func_ReadOneSector:
 	
-	cmp ax, 0fffh
-	jz Label_Read_Finish
-	;没有读完
-	add si, 512
-	jmp Label_Read_File_Content
-
-Label_Read_Finish:
-	pop si
-	pop bx
-	pop ax
-	pop es
-	ret
-
-;根据簇号获取下一个簇号
-;https://www.eit.lth.se/fileadmin/eit/courses/eitn50/Literature/fat12_description.pdf fat cluster介绍
-;入参
-;ax 当前簇号
-;出参
-;ax
-Func_Get_Next_Clue:
-	push es
-	push bx
-	push dx
-	push ax	
-	;重置下es
-	mov ax, 0
-	mov es, ax
-	;读取fat1
-	mov ax, [BPB_FATSz16]
-	mov dx, 1 ;fat从第一个扇区开始
-	mov bx, 9000h
-	call Func_Read_Sector_Data
-
-	;每一个簇在fat1表中占12bit, 1.5byte
-	pop ax
-	mov bx, 3
-	mul bx
-	;dx保存 奇偶标志 0偶数 1基数
-	mov dx, ax	
-	and dx, 1
-	shr ax, 1
-	;至此簇在fat中的偏移位置为  9000 + ax
-	add ax, 9000h
-	mov bx, ax
-
-	cmp dx, 0
-	jnz Label_Odd
-	;If n is even, then the physical location of the entry is the low four bits in location 1+(3*n)/2 and the 8 bits in location (3*n)/2
-	;先一个完整的字节，后一半
-	mov al, [es:bx]
-	inc bx
-	mov ah, [es:bx]
-	and ah, 0fh
-	jmp Label_Return
-
-Label_Odd:
-	;If n is odd, then the physical location of the entry is the high four bits in location (3*n)/2 and the 8 bits in location 1+(3*n)/2 
-	mov al, [es:bx]
-	inc bx
-	mov ah, [es:bx]
-	shr ax, 4
-Label_Return:
-	pop dx
-	pop bx
-	pop es
-	ret
-
-;======= 读取扇区数据
-;参数
-;al : 读取的扇区数量
-;dx : 读取的扇区起始位置
-;输出
-;es:bx : 数据写入位置
-
-; int13h ah=02 读扇区 参数如下 https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=02h:_Read_Sectors_From_Drive  http://c.biancheng.net/view/3606.html
-; al=扇区数 ch=柱面 cl=扇区 dh=磁头 dl=驱动器
-; 出参 cf=0成功 ah=00, al=传输的扇区数 ah=其他，错误
-
-;=======lba转换成chs c:柱面 h:磁头 s:扇区
-;c = 逻辑扇区号ax / (每个磁道的扇区数*磁头数量)
-;h = 逻辑扇区号ax / 每个磁道的扇区数
-;s = 逻辑扇区号ax % 每个磁道的扇区数 ， 由于s从1开始，所以要加+1
-;反着来就是
-;s = (逻辑扇区号ax % 每个磁道的扇区数) + 1, 商为Q
-;h = Q % 磁头数量 , 商为W
-;c = W
-Func_Read_Sector_Data:
-	;ax后面要用到所以先入栈保存下
-	push dx
-	push ax
-	push bx
-	;转换lba -> chs
-	mov ax, dx
+	push	bp
+	mov	bp,	sp
+	sub	esp,	2
+	mov	byte	[bp - 2],	cl
+	push	bx
 	mov	bl,	[BPB_SecPerTrk]
-	div	bl; 商al,余数ah
-
-	;确定s扇区号
-	mov cl, ah
-	inc cl
-	;确定h磁头号
-	mov dh, al
-	and dh, 1
-
-	;确定磁柱
-	shr al, 1
-	mov ch, al
-	;确定驱动器号
+	div	bl
+	inc	ah
+	mov	cl,	ah
+	mov	dh,	al
+	shr	al,	1
+	mov	ch,	al
+	and	dh,	1
+	pop	bx
 	mov	dl,	[BS_DrvNum]
-	;先弹出bx
-	pop bx ;数据输出位置
-	pop ax ;al读取的扇区数量
-	mov ah, 02h ;读磁盘
-	;至此准备工作就绪，要开始读了
-	int 13h
-	pop dx
+Label_Go_On_Reading:
+	mov	ah,	2
+	mov	al,	byte	[bp - 2]
+	int	13h
+	jc	Label_Go_On_Reading
+	add	esp,	2
+	pop	bp
 	ret
 
-;打印日志
-;入参 
-;es:bp 输出内容地址
-;字符串以00结尾
-Func_Print_Message:	
-	push dx
-	push ax
-	push bx
-	push bp
-	;计算cx
-	mov dx, 0
-	mov ax, 0
+;=======	get FAT Entry
+
+Func_GetFATEntry:
+
+	push	es
+	push	bx
+	push	ax
+	mov	ax,	00
+	mov	es,	ax
+	pop	ax
+	mov	byte	[Odd],	0
+	mov	bx,	3
+	mul	bx
+	mov	bx,	2
+	div	bx
+	cmp	dx,	0
+	jz	Label_Even
+	mov	byte	[Odd],	1
+
+Label_Even:
+
+	xor	dx,	dx
+	mov	bx,	[BPB_BytesPerSec]
+	div	bx
+	push	dx
+	mov	bx,	8000h
+	add	ax,	SectorNumOfFAT1Start
+	mov	cl,	2
+	call	Func_ReadOneSector
 	
-Label_Cal_Length:
-	mov al, [es:bp]
-	inc bp
-	cmp al, 0x30 ;0对应的0x30
-	jnz Label_Cal_Length
-Label_Zero_Inc: ;找到0
-	inc dx
-	cmp dx, 2	;是否是第二个0
-	jnz Label_Cal_Length
-Label_Find_End:
-	mov cx, bp
-	pop bp
-	sub cx, bp ;减去字符串起始位置
-	sub cx, 2 ;减去两个0的长度
+	pop	dx
+	add	bx,	dx
+	mov	ax,	[es:bx]
+	cmp	byte	[Odd],	1
+	jnz	Label_Even_2
+	shr	ax,	4
 
-	;计算打印位置 dh -> row dl->col	
-	mov dh, [PrintRow]
-	mov dl, [PrintCol]
-	mov ax, 1301h
-	mov bx, 000fh
-	int 10h
-	mov al, [PrintRow]
-	inc al
-	mov [PrintRow], al
-
-	pop bx
-	pop ax
-	pop dx
+Label_Even_2:
+	and	ax,	0FFFh
+	pop	bx
+	pop	es
 	ret
+
 ;=======	display num in al
 
 Label_DispAL:
@@ -649,6 +708,7 @@ Label_DispAL:
 	
 	ret
 
+
 ;=======	tmp IDT
 
 IDT:
@@ -659,26 +719,32 @@ IDT_POINTER:
 		dw	IDT_END - IDT - 1
 		dd	IDT
 
-PrintRow	db 0x07
-PrintCol	db 0
-PrintLastChar db 0
-KernelTmpFileOffset dd OffsetOfKernelFile
+;=======	tmp variable
+
+RootDirSizeForLoop	dw	RootDirSectors
+SectorNo		dw	0
+Odd			db	0
+OffsetOfKernelFileCount	dd	OffsetOfKernelFile
+
+MemStructNumber		dd	0
+
+SVGAModeCounter		dd	0
+
 DisplayPosition		dd	0
 
 ;=======	display messages
-StartLoaderMessage:	db	"Start Loader00"
-KernelFileName: db "KERNEL  BIN"
-StartSearchKernel: db "Start Search Kernel00"
-NoKernelMessage:	db	"No Kernel00"
-SearchedKernelFile: db "find kernel1100"
-StartGetMemStructMessage:	db	"Start Get Memory Struct00"
-GetMemStructErrMessage:	db	"Get Memory Struct ERROR00"
-GetMemStructOKMessage:	db	"Get Memory Struct SUCCESSFUL00"
 
-StartGetSVGAVBEInfoMessage:	db	"Start Get SVGA VBE Info00"
-GetSVGAVBEInfoErrMessage:	db	"Get SVGA VBE Info ERROR00"
-GetSVGAVBEInfoOKMessage:	db	"Get SVGA VBE Info SUCCESSFUL00"
+StartLoaderMessage:	db	"Start Loader"
+NoLoaderMessage:	db	"ERROR:No KERNEL Found"
+KernelFileName:		db	"KERNEL  BIN",0
+StartGetMemStructMessage:	db	"Start Get Memory Struct (address,size,type)."
+GetMemStructErrMessage:	db	"Get Memory Struct ERROR"
+GetMemStructOKMessage:	db	"Get Memory Struct SUCCESSFUL!"
 
-StartGetSVGAModeInfoMessage:	db	"Start Get SVGA Mode Info00"
-GetSVGAModeInfoErrMessage:	db	"Get SVGA Mode Info ERROR00"
-GetSVGAModeInfoOKMessage:	db	"Get SVGA Mode Info SUCCESSFUL00"
+StartGetSVGAVBEInfoMessage:	db	"Start Get SVGA VBE Info"
+GetSVGAVBEInfoErrMessage:	db	"Get SVGA VBE Info ERROR"
+GetSVGAVBEInfoOKMessage:	db	"Get SVGA VBE Info SUCCESSFUL!"
+
+StartGetSVGAModeInfoMessage:	db	"Start Get SVGA Mode Info"
+GetSVGAModeInfoErrMessage:	db	"Get SVGA Mode Info ERROR"
+GetSVGAModeInfoOKMessage:	db	"Get SVGA Mode Info SUCCESSFUL!"
