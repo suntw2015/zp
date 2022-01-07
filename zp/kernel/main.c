@@ -26,7 +26,7 @@ void Start_Kernel(void)
 	}
 
 	displayChar(addr, 0, 0, 'A', (char)0xFF, (char)0x00, (char)0x00, (char)0x00);
-
+	
 	char str[] = "hello";
 	displayString(addr, 20, 0, str, (char)0xFF, (char)0x00, (char)0x00, (char)0x00);
 }

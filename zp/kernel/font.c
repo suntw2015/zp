@@ -6,7 +6,7 @@ int getPointAddressOffset(int x, int y) {
 }
 
 //显示一个点
-void displayPoint(char* addr, int x, int y, char r, char g, char b, int alpha) {
+void displayPoint(char* addr, int x, int y, char r, char g, char b, char alpha) {
     int offset = getPointAddressOffset(x, y);
     *(addr+offset+0) = b;
     *(addr+offset+0) = g;
@@ -15,7 +15,7 @@ void displayPoint(char* addr, int x, int y, char r, char g, char b, int alpha) {
 }
 
 //显示一个字符
-void displayChar(char* addr, int x, int y, char c,char r, char g, char b, int alpha) {
+void displayChar(char* addr, int x, int y, char c,char r, char g, char b, char alpha) {
     char *map = font_ascii[c];
     int i,j;
 
@@ -28,7 +28,7 @@ void displayChar(char* addr, int x, int y, char c,char r, char g, char b, int al
     }
 }
 
-void displayString(char* addr, int x, int y, char* str,char r, char g, char b, int alpha) {
+void displayString(char* addr, int x, int y, char* str,char r, char g, char b, char alpha) {
     int i;
     for (i=0;str[i] != '\0';i++) {
         displayChar(addr, x, y, str[i], r, g, b, alpha);

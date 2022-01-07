@@ -335,9 +335,9 @@ static unsigned char font_ascii[256][16]=
 //获取点对应的偏移量
 int getPointAddressOffset(int x, int y);
 //显示一个点
-void displayPoint(char* addr, int x, int y, char r, char g, char b, int alpha);
+void displayPoint(char* addr, int x, int y, char r, char g, char b, char alpha);
 //显示一个字符
-void displayChar(char* addr, int x, int y, char c,char r, char g, char b, int alpha);
+void displayChar(char* addr, int x, int y, char c,char r, char g, char b, char alpha);
 //显示字符串
-void displayString(char* addr, int x, int y, char* str,char r, char g, char b, int alpha);
+void displayString(char* addr, int x, int y, char* str,char r, char g, char b, char alpha);
 #endif
