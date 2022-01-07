@@ -23,8 +23,10 @@ head.o:	head.S
 	gcc -E  head.S > head.s
 	as --64 -o head.o head.s
 	
-main.o:	main.c
+main.o:	main.c font.o
 	gcc  -mcmodel=large -fno-builtin -m64 -c main.c
+font.o: font.c
+	gcc -mcmodel=large -fno-builtin -m64 -c font.c
 
 clean:
 	rm -rf *.o *.s~ *.s *.S~ *.c~ *.h~ system  Makefile~ Kernel.lds~ kernel.bin 
