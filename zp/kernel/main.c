@@ -12,9 +12,9 @@
 
 void Start_Kernel(void)
 {
-	init();
-	displayChar((char *)0xffff800000a00000, 0, 0, 'A', 0xFF, 0, 0, 0);
+	char * addr = (char *)0xffff800000a00000;
+	displayChar(addr, 0, 0, 'A', 0xFF, 0, 0, 0);
 
 	char str[] = "hello";
-	displayString((char *)0xffff800000a00000, 20, 0, str, 0xFF, 0, 0, 0);
+	displayString(addr, 20, 0, str, 0xFF, 0, 0, 0);
 }
