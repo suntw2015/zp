@@ -8,7 +8,7 @@ head.o:	head.S font.o
 	gcc -E  head.S > head.s
 	as --64 -o head.o head.s
 	
-main.o:	main.c font.o
+main.o:	main.c font.h
 	gcc  -mcmodel=large -fno-builtin -m64 -c main.c
 font.o: font.c
 	gcc -mcmodel=large -fno-builtin -m64 -c font.c
