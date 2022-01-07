@@ -20,7 +20,7 @@
 #define SCREEN_ROW_MAX 900 //屏幕最大值
 #define SCREEN_COL_MAX 1400 //屏幕
 
-unsigned char font_ascii[256][16]=
+static unsigned char font_ascii[256][16]=
 {
 	/*	0000	*/
 	{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
@@ -338,6 +338,6 @@ int getPointAddressOffset(int x, int y);
 void displayPoint(char* addr, int x, int y, char r, char g, char b, int alpha);
 //显示一个字符
 void displayChar(char* addr, int x, int y, char c,char r, char g, char b, int alpha);
-//显示一个字符串
+//显示字符串
 void displayString(char* addr, int x, int y, char* str,char r, char g, char b, int alpha);
 #endif
