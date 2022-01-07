@@ -25,8 +25,14 @@ void Start_Kernel(void)
 		}
 	}
 
+	for (i=25;i<30;i++) {
+		for (j=0;j<1400;j++) {
+			displayPoint(addr, i, j, (char)0xff, (char)0x00, (char)0x00, (char)0x00);
+		}
+	}
+
 	displayChar(addr, 0, 0, 'A', (char)0xFF, (char)0x00, (char)0x00, (char)0x00);
-	
+
 	char str[] = "hello";
 	displayString(addr, 20, 0, str, (char)0xFF, (char)0x00, (char)0x00, (char)0x00);
 }
