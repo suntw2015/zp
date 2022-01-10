@@ -15,10 +15,8 @@
 
 #ifndef __FONT_H__
 #define __FONT_H__
-#define FONT_DEFAULT_X_LEN 16 //字符默认x像素长度
-#define FONT_DEFAULT_Y_LEN 8 //字符默认y像素长度
-#define SCREEN_ROW_MAX 900 //屏幕最大值
-#define SCREEN_COL_MAX 1400 //屏幕
+#define FONT_DEFAULT_WIDTH 8 //字符默认x像素长度
+#define FONT_DEFAULT_HEIGHT 16 //字符默认y像素高度
 
 static unsigned char font_ascii[256][16]=
 {
