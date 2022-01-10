@@ -20,9 +20,9 @@ void displayChar(char* addr, int x, int y, char c,char r, char g, char b, char a
     int i,j;
 
     for (i=0;i<FONT_DEFAULT_HEIGHT;i++) {
-        for (j=FONT_DEFAULT_WIDTH-1;j>=0;j--) {
+        for (j=0;j<FONT_DEFAULT_WIDTH;j++) {
             if ((map[i] >> j) & 1) {
-                displayPoint(addr, x+i, y+j, r, g, b, alpha);
+                displayPoint(addr, x+i, y+FONT_DEFAULT_WIDTH-j, r, g, b, alpha);
             }
         }
     }
