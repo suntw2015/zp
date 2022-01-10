@@ -8,6 +8,6 @@ typedef struct KernelConfig
 	int screenMaxCol;	//屏幕最大列
 } KernelConfig;
 
-// extern KernelConfig kernelConfig;
+extern KernelConfig kernelConfig;
 
 #endif
