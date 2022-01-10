@@ -33,9 +33,7 @@ void Start_Kernel(void)
 	}
 
 	displayChar(addr, 0, 0, 'A', 0xFF, 0x00, 0x00, 0x00);
-
-	char str[] = "hello";
-	displayString(addr, 20, 0, str, 0x00, 0xFF, 0x00, 0x00);
+	displayString(addr, 100, 0, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", 0xff, 0, 0, 0);
 
 	while (1) {}
 }
