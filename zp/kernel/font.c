@@ -2,7 +2,7 @@
 #include "main.h"
 
 int getPointAddressOffset(int x, int y) {
-    return (x * KernelConfig.screenMaxCol + y) * 4;
+    return (x * kernelConfig.screenMaxCol + y) * 4;
 }
 
 //显示一个点
