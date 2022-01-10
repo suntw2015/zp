@@ -27,7 +27,7 @@ void Start_Kernel(void)
 
 	for (i=25;i<30;i++) {
 		for (j=0;j<1400;j++) {
-			displayPoint(addr, i, j, (char)0xff, (char)0x00, (char)0x00, (char)0x00);
+			displayPoint(addr, i, j, 0xff, 0x00, 0x00, 0x00);
 		}
 	}
 

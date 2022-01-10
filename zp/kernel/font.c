@@ -9,9 +9,9 @@ int getPointAddressOffset(int x, int y) {
 void displayPoint(char* addr, int x, int y, char r, char g, char b, char alpha) {
     int offset = getPointAddressOffset(x, y);
     *(addr+offset+0) = b;
-    *(addr+offset+0) = g;
-    *(addr+offset+0) = r;
-    *(addr+offset+0) = alpha;
+    *(addr+offset+1) = g;
+    *(addr+offset+2) = r;
+    *(addr+offset+3) = alpha;
 }
 
 //显示一个字符
