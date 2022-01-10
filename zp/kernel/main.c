@@ -36,4 +36,6 @@ void Start_Kernel(void)
 
 	char str[] = "hello";
 	displayString(addr, 20, 0, str, 0x00, 0xFF, 0x00, 0x00);
+
+	while (1) {}
 }
