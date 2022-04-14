@@ -330,12 +330,24 @@ static unsigned char font_ascii[256][16]=
 	{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
 };
 
+//字体颜色
+enum FontColor {
+    RED,
+    GREEN,
+    BLUE,
+};
+
 //获取点对应的偏移量
 int getPointAddressOffset(int x, int y);
+//字符是否可以打印
+int isCharCanPrint(char c);
 //显示一个点
 void displayPoint(char* addr, int x, int y, char r, char g, char b, char alpha);
 //显示一个字符
 void displayChar(char* addr, int x, int y, char c,char r, char g, char b, char alpha);
 //显示字符串
 void displayString(char* addr, int x, int y, char* str,char r, char g, char b, char alpha);
+
+//智能显示字符串
+void displayStringSmart(char *str, enum FontColor color);
 #endif
