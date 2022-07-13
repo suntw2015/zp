@@ -1,0 +1,140 @@
+; boot.asm
+org	0x7c00
+jmp Label_Start
+
+;====== gdt
+LABEL_GDT:		dd	0,0
+LABEL_DESC_CODE32:
+	dw 0xFFFF		;segment limit first 0-15 bits
+	dw 0x0000		;base first 0-15 bits
+	db 0x00			;base 16-23 bits
+	db 0b10011010	;access byte
+	db 0b11001111	;high 4 bits (flags) low 4 bits (limit 4 last bits)(limit is 20 bit wide)
+	db 0x00			;base 24-31 bits
+LABEL_DESC_DATA32:
+	dw 0xFFFF		;segment limit first 0-15 bits
+	dw 0x0000		;base first 0-15 bits
+	db 0x00			;base 16-23 bits
+	db 0b10010010	;access byte
+	db 0b11001111	;high 4 bits (flags) low 4 bits (limit 4 last bits)(limit is 20 bit wide)
+	db 0x00			;base 24-31 bits
+LABEL_DESC_VIDEO:
+	dw 0xFFFF		;segment limit first 0-15 bits
+	dw 0x8000		;base first 0-15 bits
+	db 0x0B			;base 16-23 bits
+	db 0b10010010			;access byte
+	db 0b11001111	;high 4 bits (flags) low 4 bits (limit 4 last bits)(limit is 20 bit wide)
+	db 0x00			;base 24-31 bits
+
+LABEL_GDT_END:
+
+GdtPtr	dw	LABEL_GDT_END - LABEL_GDT - 1
+	dd	LABEL_GDT
+
+SelectorCode	equ	LABEL_DESC_CODE32 - LABEL_GDT
+SelectorData	equ	LABEL_DESC_DATA32 - LABEL_GDT
+
+SelectorVideo	equ LABEL_DESC_VIDEO - LABEL_GDT
+;
+
+Label_Start:
+	mov	ax,	cs
+	mov	ds,	ax
+	mov	es,	ax
+	mov	ss,	ax
+
+;=======	clear screen
+	mov	ax,	0600h
+	mov	bx,	0700h
+	mov	cx,	 0 ;ch起始行数 cl起始列数
+	mov	dx,	184fh ;dh 结束行数 dl结束列数
+	int	10h
+
+mov bp, StartBootMessage
+call Func_Print_Message
+
+cli
+lgdt [GdtPtr]
+
+mov	eax,	cr0
+or	eax,	1
+mov	cr0,	eax
+
+jmp SelectorCode:LABEL_SEG_CODE32
+
+;打印日志
+;入参 
+;es:bp 输出内容地址
+;字符串以00结尾
+Func_Print_Message:	
+	push dx
+	push ax
+	push bx
+	push bp
+	;计算cx
+	mov dx, 0
+	mov ax, 0
+	
+Label_Cal_Length:
+	mov al, [es:bp]
+	inc bp
+	cmp al, 0x30 ;0对应的0x30
+	jnz Label_Cal_Length
+Label_Zero_Inc: ;找到0
+	inc dx
+	cmp dx, 2	;是否是第二个0
+	jnz Label_Cal_Length
+Label_Find_End:
+	mov cx, bp
+	pop bp
+	sub cx, bp ;减去字符串起始位置
+	sub cx, 2 ;减去两个0的长度
+
+	;计算打印位置 dh -> row dl->col	
+	mov dh, [PrintRow]
+	mov dl, [PrintCol]
+	mov ax, 1301h
+	mov bx, 000fh
+	int 10h
+	mov al, [PrintRow]
+	inc al
+	mov [PrintRow], al
+
+	pop bx
+	pop ax
+	pop dx
+	ret
+
+[BITS	32]
+
+LABEL_SEG_CODE32:
+	; mov	bp,	StartProtectModel
+	; call Func_Print_Message
+
+	mov	ax, SelectorVideo
+	mov	gs, ax			; 视频段选择子(目的)
+
+	mov	edi, (80 * 11 + 79) * 2	; 屏幕第 11 行, 第 79 列。
+	mov	ah, 0Ch			; 0000: 黑底    1100: 红字
+	mov	al, 'P'
+	mov	[gs:edi], ax
+
+	; 到此停止
+	call main
+	jmp $
+
+;=======	tmp variable
+
+PrintRow	db 0
+PrintCol	db 0
+PrintLastChar db 0
+
+;=======	display messages
+
+StartBootMessage:	db	"Start boot00"
+StartProtectModel:  db  "protect model00"
+
+;=======	fill zero until whole sector
+
+	times	510 - ($ - $$)	db	0
+	dw	0xaa55
