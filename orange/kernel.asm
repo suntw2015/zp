@@ -1,5 +1,6 @@
-org 0x10000
+section [text]
 
+start:
 ;====== gdt start
 jmp Kernel_Start
 LABEL_GDT:		dd	0,0
@@ -57,6 +58,7 @@ Kernel_Start:
 
 ;内核入口(保护模式)
 [BITS 32]
+extern main
 Kernel_Start32:
     mov	ax, SelectorVideo
 	mov	gs, ax			; 视频段选择子(目的)
@@ -67,5 +69,5 @@ Kernel_Start32:
 	mov	[gs:edi], ax
 
 	; 到此停止
-	; call main
+	call main
 	jmp $
