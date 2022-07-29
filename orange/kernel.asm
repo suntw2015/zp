@@ -44,11 +44,9 @@ Kernel_Start:
 	mov	ss,	ax
 
     ;关中断
-    cli
     ;加载gdt, 在bochs里执行的是 lgdt ds:[di], 兼容一下
-	mov ax, GdtPtr
-	mov di, ax
     lgdt [GdtPtr]
+    cli
     ;进入保护模式
     mov	eax,	cr0
     or	eax,	1

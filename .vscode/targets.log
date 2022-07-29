@@ -1,0 +1,254 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 3.82
+# Built for x86_64-redhat-linux-gnu
+# Copyright (C) 2010  Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+ 
+
+# Make data base, printed on Thu May 19 09:22:22 2022
+
+# Variables
+
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# automatic
+?F = $(notdir $?)
+# default
+.SHELLFLAGS := -c
+# environment
+VSCODE_AGENT_FOLDER = /root/.vscode-server-insiders
+# environment
+VSCODE_LOG_NATIVE = false
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# automatic
+@F = $(notdir $@)
+# environment
+APP_ENV = test
+# makefile
+CURDIR := /root/program/zp
+# makefile
+SHELL = /bin/sh
+# environment
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1fd10eb650d772240a7a703faed63957.zh-cn","_translationsConfigFile":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn/tcf.json","_cacheRoot":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn","_resolvedLanguagePackCoreLocation":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn/42b1f560e3badc792056a1021094fbf859588d8d","_corruptedFile":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn/corrupted.info","_languagePackSupport":true}
+# environment
+_ = /usr/bin/make
+# makefile (from `Makefile', line 1)
+MAKEFILE_LIST :=  Makefile
+# environment
+VSCODE_VERBOSE_LOGGING = true
+# environment
+LESSOPEN = ||/usr/bin/lesspipe.sh %s
+# environment
+MATRIX_PRIVDATA_DIR = /tmp/data0
+# environment
+VSCODE_CWD = /root
+# environment
+SSH_CONNECTION = 10.33.68.88 58349 10.26.15.86 22
+# environment
+PATH = /root/.vscode-server-insiders/bin/42b1f560e3badc792056a1021094fbf859588d8d/bin/remote-cli:/root/jdk-11:/usr/local/matrix/sbin:/usr/local/matrix/bin:/usr/local/matrix/bin:/usr/local/matrix/bin:/root/jdk-11:/usr/local/matrix/sbin:/usr/local/matrix/bin:/usr/local/matrix/bin:/usr/local/matrix/bin:/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/root/bin
+# environment
+XDG_RUNTIME_DIR = /run/user/0
+# environment
+VSCODE_LOG_STACK = false
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver check-symlink
+# automatic
+%F = $(notdir $%)
+# environment
+GOBIN = /usr/local/matrix/bin
+# environment
+VSCODE_PIPE_LOGGING = true
+# environment
+PWD = /root/program/zp
+# environment
+VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-671bdf5d-943f-48f9-86e8-b1d0990c83af.sock
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
+ 
+make: *** No rule to make target `all'.  Stop.
+
+HISTTIMEFORMAT = %d/%m/%y %T 
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /root
+# environment
+LOGNAME = root
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+# automatic
++F = $(notdir $+)
+# environment
+GOPKG = /usr/local/matrix/pkg
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+MAKE_VERSION := 3.82
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# environment
+HOSTNAME = suntianwen002
+# environment
+MAKELEVEL := 0
+# default
+MAKE = $(MAKE_COMMAND)
+# default
+MAKECMDGOALS := all
+# environment
+SHLVL = 5
+# environment
+JAVA_HOME = /usr/local/matrix
+# environment
+XDG_SESSION_ID = 666767
+# environment
+USER = root
+# makefile
+.DEFAULT_GOAL := main
+# environment
+GOROOT = /usr/local/matrix
+# environment
+CLASSPATH = .:/usr/local/matrix/lib/dt.jar:/usr/local/matrix/lib/tools.jar
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# default
+MAKE_COMMAND := make
+# default
+.VARIABLES := 
+# automatic
+*F = $(notdir $*)
+# makefile
+MAKEFLAGS = Rrqp
+# environment
+MFLAGS = -Rrqp
+# environment
+SSH_CLIENT = 10.33.68.88 58349 22
+# environment
+MAIL = /var/spool/mail/root
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+BROWSER = /root/.vscode-server-insiders/bin/42b1f560e3badc792056a1021094fbf859588d8d/bin/helpers/browser.sh
+# environment
+VSCODE_HANDLES_SIGPIPE = true
+# default
+MAKEFILES := 
+# environment
+PROMPT_COMMAND = history -a; history -a; history -a; history -a; 
+# automatic
+<F = $(notdir $<)
+# environment
+LC_ALL = C
+# automatic
+^F = $(notdir $^)
+# default
+SUFFIXES := 
+# environment
+HISTSIZE = 3000
+# default
+.INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
+# default
+.RECIPEPREFIX := 
+# environment
+LANG = C
+# environment
+VSCODE_EXTHOST_WILL_SEND_SOCKET = true
+# variable set hash-table stats:
+# Load=72/1024=7%, Rehash=0, Collisions=7/94=7%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 64769, inode 902927): 31 files, no impossibilities.
+
+# 31 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+all:
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has not been updated.
+
+vhd.o: vhd.c
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from `Makefile', line 5):
+	cc -c vhd.c
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-01-10 14:38:10.113
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+vhd.c:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+clean:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from `Makefile', line 7):
+	rm vhd.o
+	rm vhdRead
+	rm vhdWrite
+
+main: vhd.o
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from `Makefile', line 2):
+	cc -o vhdRead vhd.o vhdRead.c
+	cc -o vhdWrite vhd.o vhdWrite.c
+
+# files hash-table stats:
+# Load=8/1024=1%, Rehash=0, Collisions=0/21=0%
+# VPATH Search Paths
+
+# No `vpath' search paths.
+
+# No general (`VPATH' variable) search path.
+
+# # of strings in strcache: 0 / lookups = 48 / hits = 48
+# # of strcache buffers: 1 (* 8176 B/buffer = 8176 B)
+# strcache used: total = 0 (385) / max = 0 / min = 8176 / avg = 0
+ 
+# strcache free: total = 0 (7791) / max = 0 / min = 8176 / avg = 0
+
+# strcache hash-table stats:
+# Load=40/8192=0%, Rehash=0, Collisions=1/48=2%
+# Finished Make data base on Thu May 19 09:22:22 2022
+
+ 

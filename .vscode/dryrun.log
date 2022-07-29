@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/root/program/zp'
+make: Leaving directory `/root/program/zp'
+ 
+make: *** No rule to make target `vhd.c', needed by `vhd.o'.
+
