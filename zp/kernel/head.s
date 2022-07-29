@@ -18,7 +18,6 @@ _start:
  mov $0x7E00, %esp
 
 
-
  lgdt GDT_POINTER(%rip)
 
 

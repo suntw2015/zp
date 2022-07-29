@@ -1,6 +1,5 @@
-section [text]
-
-start:
+global _start:
+_start:
 ;====== gdt start
 jmp Kernel_Start
 LABEL_GDT:		dd	0,0
@@ -46,7 +45,9 @@ Kernel_Start:
 
     ;关中断
     cli
-    ;加载gdt
+    ;加载gdt, 在bochs里执行的是 lgdt ds:[di], 兼容一下
+	mov ax, GdtPtr
+	mov di, ax
     lgdt [GdtPtr]
     ;进入保护模式
     mov	eax,	cr0
