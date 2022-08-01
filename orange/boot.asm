@@ -8,6 +8,40 @@ kernelOffset equ 0x000
 kernelSecCount equ 10 
 jmp Label_Start
 
+;GDT define
+LABEL_GDT:              dd      0,0
+LABEL_DESC_CODE32:
+        dw 0xFFFF               ;segment limit first 0-15 bits
+        dw 0x0000               ;base first 0-15 bits
+        db 0x00                 ;base 16-23 bits
+        db 0b10011010   ;access byte
+        db 0b11001111   ;high 4 bits (flags) low 4 bits (limit 4 last bits)(limit is 20 bit wide)
+        db 0x00                 ;base 24-31 bits
+LABEL_DESC_DATA32:
+        dw 0xFFFF               ;segment limit first 0-15 bits
+        dw 0x0000               ;base first 0-15 bits
+        db 0x00                 ;base 16-23 bits
+        db 0b10010010   ;access byte
+        db 0b11001111   ;high 4 bits (flags) low 4 bits (limit 4 last bits)(limit is 20 bit wide)
+        db 0x00                 ;base 24-31 bits
+LABEL_DESC_VIDEO:
+        dw 0xFFFF               ;segment limit first 0-15 bits
+        dw 0x8000               ;base first 0-15 bits
+        db 0x0B                 ;base 16-23 bits
+        db 0b10010010                   ;access byte
+        db 0b11001111   ;high 4 bits (flags) low 4 bits (limit 4 last bits)(limit is 20 bit wide)
+        db 0x00                 ;base 24-31 bits
+
+LABEL_GDT_END:
+
+GdtPtr  dw      LABEL_GDT_END - LABEL_GDT - 1
+        dd      LABEL_GDT
+
+SelectorCode    equ     LABEL_DESC_CODE32 - LABEL_GDT
+SelectorData    equ     LABEL_DESC_DATA32 - LABEL_GDT
+
+SelectorVideo   equ LABEL_DESC_VIDEO - LABEL_GDT
+
 Label_Start:
 	mov	ax,	cs
 	mov	ds,	ax
@@ -45,8 +79,13 @@ Label_Start:
 	mov bx, kernelOffset
 	int 13h
 
-	;跳转至内核
-	jmp kernelBase:kernelOffset
+cli
+lgdt [GdtPtr]
+mov eax, cr0
+or eax, 1
+mov cr0, eax
+
+jmp dword SelectorCode:0x10000
 
 ;=======	display messages
 StartBootMessage:	db	"Start boot"

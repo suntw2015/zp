@@ -1,4 +1,4 @@
-booKernel: boot.bin kernel
+bootKernel: boot.bin kernel
 	touch bootKernel
 	dd if=boot.bin of=bootKernel bs=512 count=1 conv=notrunc
 	dd if=kernel of=bootKernel bs=512 count=10 seek=1 conv=notrunc
@@ -12,7 +12,7 @@ boot.img : boot.bin kernel
 boot.bin : boot.asm
 	nasm boot.asm -o boot.bin
 kernel : main.o kernel.o
-	ld kernel.o main.o -e _start -o kernel -m elf_i386 -Ttext 0x10000 --oformat binary
+	ld kernel.o main.o  -o kernel -Ttext 0x10000 -m elf_i386  --oformat binary
 kernel.o : kernel.asm
 	nasm kernel.asm -f elf -o kernel.o
 main.o : main.c
