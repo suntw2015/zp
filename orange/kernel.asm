@@ -38,6 +38,9 @@ SelectorVideo   equ LABEL_DESC_VIDEO - LABEL_GDT
 
 extern main
 _start:
+	mov ax, SelectorData
+	mov ds,ax
+	mov es,ax
     	mov	ax, SelectorVideo
 	mov	gs, ax			; 视频段选择子(目的)
 

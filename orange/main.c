@@ -1,10 +1,7 @@
 int main() {
-    char *video = (char*)0xb8000;
-    char *str = "main function";
-    for (int i=0;i<10;i++) {
- 	*video = str[i];
-	video++;
-    }
+    char *video = (char*)0xB8000;
+
+    *video = 'X';
 
     while (1) {
     };
