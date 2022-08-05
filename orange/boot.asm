@@ -1,11 +1,12 @@
 ; boot.asm
 org	0x7c00
+bootOtherSecCount equ 2
 ;内核基础地址
 kernelBase equ 0x1000
 ;内核目标偏移地址
 kernelOffset equ 0x000
 ;内核大小
-kernelSecCount equ 10 
+kernelSecCount equ 10
 jmp Label_Start
 
 ;GDT define
@@ -62,6 +63,18 @@ Label_Start:
 	mov bp, StartBootMessage
 	int 10h
 
+;======= 加载其他的boot功能
+	mov ah, 2
+	mov al, bootOtherSecCount
+	mov ch, 0
+	mov cl, 2
+	mov dh, 0
+	mov dl, 0
+
+	;数据存放es:bx
+	mov bx, 0x7e00
+	int 13h
+
 ;======= load kernel & jump
 ; int13h ah=02 读扇区 参数如下 https://en.wikipedia.org/wiki/INT_13H#INT_13h_AH=02h:_Read_Sectors_From_Drive  http://c.biancheng.net/view/3606.html
 ; al=扇区数 ch=柱面 cl=扇区 dh=磁头 dl=驱动器
@@ -70,6 +83,7 @@ Label_Start:
 	mov al, kernelSecCount
 	mov ch, 0
 	mov cl, 2
+	add cl, bootOtherSecCount
 	mov dh, 0
 	mov dl, 0
 
@@ -79,13 +93,18 @@ Label_Start:
 	mov bx, kernelOffset
 	int 13h
 
-cli
-lgdt [GdtPtr]
-mov eax, cr0
-or eax, 1
-mov cr0, eax
+;======= 干些其他的事情
+	call Func_Boot_Entry
 
-jmp dword SelectorCode:0x10000
+;======= 进入保护模式
+
+	cli
+	lgdt [GdtPtr]
+	mov eax, cr0
+	or eax, 1
+	mov cr0, eax
+
+	jmp dword SelectorCode:0x10000
 
 ;=======	display messages
 StartBootMessage:	db	"Start boot"
@@ -94,3 +113,43 @@ StartBootMessage:	db	"Start boot"
 
 	times	510 - ($ - $$)	db	0
 	dw	0xaa55
+
+;======= second sector, do some bois function
+MemoryLayout:
+	db 0 ;ards cout
+MemoryLayoutAddr:
+	times 256 db 0 ; ards detail
+
+Screen:
+	db 0 ;width
+	db 0 ;height
+
+Func_Boot_Entry:
+	call Func_Detect_Memory
+	ret
+
+;======= detect memory e820
+Func_Detect_Memory:
+	mov bx, 0
+	mov cx, MemoryLayoutAddr
+	mov di, cx
+	mov edx, 0x0534D4150
+
+.loop
+	mov ax, 0xe820
+	; write ards to es:di
+	int 15h
+	jc MemoryDetectFail
+	add di, 20
+	inc [MemoryLayout]
+	cmp bx, 0
+	jnz .loop
+	jmp MemoryDetectSuccess
+
+MemoryDetectFail:
+	mov [MemoryLayout], 0
+MemoryDetectSuccess:
+	ret
+
+Func_Detect_Screen:
+	
