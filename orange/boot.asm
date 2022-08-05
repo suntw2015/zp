@@ -108,6 +108,7 @@ Label_Start:
 
 ;=======	display messages
 StartBootMessage:	db	"Start boot"
+DetectMemortMessage: db	"detect memory"
 
 ;=======	fill zero until whole sector
 
@@ -125,29 +126,45 @@ Screen:
 	db 0 ;height
 
 Func_Boot_Entry:
+	mov ax, cs
+	mov es, ax
+	mov ax, 0x1301
+	mov bx, 0x000f
+	mov cx, 13 ;长度
+	mov dx, 0x0100 ;dh行 dl列
+	mov bp, DetectMemortMessage
+	int 10h
+
 	call Func_Detect_Memory
 	ret
 
-;======= detect memory e820
+;======= detect memory e820 https://blog.csdn.net/weixin_42707324/article/details/108306596
+;es:di写入ards
+;
 Func_Detect_Memory:
+	mov ax, cs
+	mov es, ax
 	mov bx, 0
 	mov cx, MemoryLayoutAddr
 	mov di, cx
-	mov edx, 0x0534D4150
 
-.loop
-	mov ax, 0xe820
+.loop:
+	mov eax, 0xe820
+	mov ecx, 20
+	mov edx, 0x0534D4150
 	; write ards to es:di
 	int 15h
 	jc MemoryDetectFail
 	add di, 20
-	inc [MemoryLayout]
-	cmp bx, 0
-	jnz .loop
+	mov ax, [MemoryLayout]
+	inc ax
+	mov [MemoryLayout], ax
+	cmp ebx, 0
+	jne .loop
 	jmp MemoryDetectSuccess
 
 MemoryDetectFail:
-	mov [MemoryLayout], 0
+	mov byte [MemoryLayout], 0
 MemoryDetectSuccess:
 	ret
 

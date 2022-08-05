@@ -7,7 +7,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # There is NO WARRANTY, to the extent permitted by law.
  
 
-# Make data base, printed on Thu May 19 09:22:22 2022
+# Make data base, printed on Fri Aug  5 16:39:27 2022
 
 # Variables
 
@@ -34,7 +34,7 @@ CURDIR := /root/program/zp
 # makefile
 SHELL = /bin/sh
 # environment
-VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1fd10eb650d772240a7a703faed63957.zh-cn","_translationsConfigFile":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn/tcf.json","_cacheRoot":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn","_resolvedLanguagePackCoreLocation":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn/42b1f560e3badc792056a1021094fbf859588d8d","_corruptedFile":"/root/.vscode-server-insiders/data/clp/1fd10eb650d772240a7a703faed63957.zh-cn/corrupted.info","_languagePackSupport":true}
+VSCODE_NLS_CONFIG = {"locale":"zh-cn","availableLanguages":{"*":"zh-cn"},"_languagePackId":"1d735750dbb1b9066c7513078396ba0f.zh-cn","_translationsConfigFile":"/root/.vscode-server-insiders/data/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn/tcf.json","_cacheRoot":"/root/.vscode-server-insiders/data/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn","_resolvedLanguagePackCoreLocation":"/root/.vscode-server-insiders/data/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn/fbf1cf3832d43088e27837dbb68d24ab65a098c1","_corruptedFile":"/root/.vscode-server-insiders/data/clp/1d735750dbb1b9066c7513078396ba0f.zh-cn/corrupted.info","_languagePackSupport":true}
 # environment
 _ = /usr/bin/make
 # makefile (from `Makefile', line 1)
@@ -48,13 +48,15 @@ MATRIX_PRIVDATA_DIR = /tmp/data0
 # environment
 VSCODE_CWD = /root
 # environment
-SSH_CONNECTION = 10.33.68.88 58349 10.26.15.86 22
+SSH_CONNECTION = 10.33.132.25 52701 10.26.15.86 22
 # environment
-PATH = /root/.vscode-server-insiders/bin/42b1f560e3badc792056a1021094fbf859588d8d/bin/remote-cli:/root/jdk-11:/usr/local/matrix/sbin:/usr/local/matrix/bin:/usr/local/matrix/bin:/usr/local/matrix/bin:/root/jdk-11:/usr/local/matrix/sbin:/usr/local/matrix/bin:/usr/local/matrix/bin:/usr/local/matrix/bin:/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/root/bin
+PATH = /root/.vscode-server-insiders/bin/fbf1cf3832d43088e27837dbb68d24ab65a098c1/bin/remote-cli:/root/jdk-11:/usr/local/matrix/sbin:/usr/local/matrix/bin:/usr/local/matrix/bin:/usr/local/matrix/bin:/root/jdk-11:/usr/local/matrix/sbin:/usr/local/matrix/bin:/usr/local/matrix/bin:/usr/local/matrix/bin:/sbin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/root/bin
 # environment
 XDG_RUNTIME_DIR = /run/user/0
 # environment
 VSCODE_LOG_STACK = false
+# environment
+ELECTRON_RUN_AS_NODE = 1
 # default
 .FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell archives jobserver check-symlink
 # automatic
@@ -66,13 +68,13 @@ VSCODE_PIPE_LOGGING = true
 # environment
 PWD = /root/program/zp
 # environment
-VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-671bdf5d-943f-48f9-86e8-b1d0990c83af.sock
-# automatic
-*D = $(patsubst %/,%,$(dir $*))
-# environment
  
 make: *** No rule to make target `all'.  Stop.
 
+VSCODE_IPC_HOOK_CLI = /run/user/0/vscode-ipc-72b6a0d4-9bee-4657-97d4-d6b28c975530.sock
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# environment
 HISTTIMEFORMAT = %d/%m/%y %T 
 # environment
 VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
@@ -81,7 +83,7 @@ HOME = /root
 # environment
 LOGNAME = root
 # environment
-APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = true
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # automatic
 +F = $(notdir $+)
 # environment
@@ -105,7 +107,7 @@ SHLVL = 5
 # environment
 JAVA_HOME = /usr/local/matrix
 # environment
-XDG_SESSION_ID = 666767
+XDG_SESSION_ID = 1090811
 # environment
 USER = root
 # makefile
@@ -127,13 +129,13 @@ MAKEFLAGS = Rrqp
 # environment
 MFLAGS = -Rrqp
 # environment
-SSH_CLIENT = 10.33.68.88 58349 22
+SSH_CLIENT = 10.33.132.25 52701 22
 # environment
 MAIL = /var/spool/mail/root
 # automatic
 +D = $(patsubst %/,%,$(dir $+))
 # environment
-BROWSER = /root/.vscode-server-insiders/bin/42b1f560e3badc792056a1021094fbf859588d8d/bin/helpers/browser.sh
+BROWSER = /root/.vscode-server-insiders/bin/fbf1cf3832d43088e27837dbb68d24ab65a098c1/bin/helpers/browser.sh
 # environment
 VSCODE_HANDLES_SIGPIPE = true
 # default
@@ -144,6 +146,8 @@ PROMPT_COMMAND = history -a; history -a; history -a; history -a;
 <F = $(notdir $<)
 # environment
 LC_ALL = C
+# environment
+ENVTYPE = test
 # automatic
 ^F = $(notdir $^)
 # default
@@ -159,7 +163,7 @@ LANG = C
 # environment
 VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 # variable set hash-table stats:
-# Load=72/1024=7%, Rehash=0, Collisions=7/94=7%
+# Load=74/1024=7%, Rehash=0, Collisions=7/96=7%
 
 # Pattern-specific Variable Values
 
@@ -167,9 +171,9 @@ VSCODE_EXTHOST_WILL_SEND_SOCKET = true
 
 # Directories
 
-# . (device 64769, inode 902927): 31 files, no impossibilities.
+# . (device 64769, inode 902927): 32 files, no impossibilities.
 
-# 31 files, no impossibilities in 1 directories.
+# 32 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -200,6 +204,7 @@ vhd.o: vhd.c
 # Not a target:
 Makefile:
 #  Implicit rule search has been done.
+ 
 #  Last modified 2022-01-10 14:38:10.113
 #  File has been updated.
 #  Successfully updated.
@@ -241,14 +246,13 @@ main: vhd.o
 
 # No general (`VPATH' variable) search path.
 
-# # of strings in strcache: 0 / lookups = 48 / hits = 48
+# # of strings in strcache: 0 / lookups = 49 / hits = 49
 # # of strcache buffers: 1 (* 8176 B/buffer = 8176 B)
-# strcache used: total = 0 (385) / max = 0 / min = 8176 / avg = 0
- 
-# strcache free: total = 0 (7791) / max = 0 / min = 8176 / avg = 0
+# strcache used: total = 0 (396) / max = 0 / min = 8176 / avg = 0
+# strcache free: total = 0 (7780) / max = 0 / min = 8176 / avg = 0
 
 # strcache hash-table stats:
-# Load=40/8192=0%, Rehash=0, Collisions=1/48=2%
-# Finished Make data base on Thu May 19 09:22:22 2022
+# Load=41/8192=1%, Rehash=0, Collisions=1/49=2%
+# Finished Make data base on Fri Aug  5 16:39:27 2022
 
  

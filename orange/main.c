@@ -1,5 +1,5 @@
 #include "help.h"
-#include <string.h>
+#include "string.h"
 
 KernelConfig kernelConfig;
 
@@ -17,8 +17,8 @@ int main() {
 
     kernelConfig.cursorCurrentCol = 0;
     kernelConfig.cursorCurrentRow = 0;
-    kernelConfig.screenMaxCol = 200;
-    kernelConfig.screenMaxRow = 100;
+    kernelConfig.screenMaxCol = 80;
+    kernelConfig.screenMaxRow = 50;
 
     init_memery();
 
@@ -50,9 +50,30 @@ void init_kernel()
 
 void init_memery()
 {
+    char a[100];
+    char b[100];
     u8 count = *((u8*)0x7e00);
+    long long t;
+
+    memset(a, 0, 100);
+    strcat(a, "ards count:");
+    itoa(count, b, 10);
+    strcat(a,b);
+    log(a);
+
     MemoryArds *ards = 0x7e01;
     for (int i=0;i<count;i++) {
-        log(sprintf("base: %ld, length: %ld , type:%d \n", ards->addr, ards->length, ards->type));
+        ards = 0x7e01 + i*20;
+        memset(a, 0, 100);
+        strcat(a, "base:");
+        itoa(ards->addr, b, 16);
+        strcat(a, b);
+        strcat(a, ", length:");
+        itoa(ards->length, b , 16);
+        strcat(a, b);
+        strcat(a, ", type:");
+        itoa(ards->type, b , 10);
+        strcat(a, b);
+        log(a);
     }
 }

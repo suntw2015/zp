@@ -11,7 +11,7 @@ typedef unsigned int u32;
 typedef __signed__ long long s64;
 typedef unsigned long long u64;
 
-typedef struct
+typedef struct __packed
 {
 	u64 addr;
 	u64 length;
@@ -36,16 +36,14 @@ extern KernelConfig kernelConfig;
  */
 static inline void outb(u8 value, u16 port)
 {
-    asm volatile("outb %0,%1" : : "a" (value), "dN" (port));
+    __asm__ volatile("outb %0,%1" : : "a" (value), "dN" (port));
 }
 
 static inline u8 inb(u16 port)
 {
 	u8 value;
-	asm volatile("inb %1,%0" : "=a" (value) : "dN" (port));
+	__asm__ volatile("inb %1,%0" : "=a" (value) : "dN" (port));
 	return value;
 }
-
-
 
 #endif
