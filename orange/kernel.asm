@@ -1,6 +1,8 @@
 ;内核入口(保护模式)
+global _start
 [BITS 32]
-jmp _start
+_start:
+        jmp entry
 
 ;GDT define
 LABEL_GDT:              dd      0,0
@@ -37,7 +39,7 @@ SelectorData    equ     LABEL_DESC_DATA32 - LABEL_GDT
 SelectorVideo   equ LABEL_DESC_VIDEO - LABEL_GDT
 
 extern main
-_start:
+entry:
 	mov ax, SelectorData
 	mov ds,ax
 	mov es,ax
