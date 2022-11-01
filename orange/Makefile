@@ -25,5 +25,7 @@ main.o : main.c
 	$(CC) -c $? -o $@ $(CC-FLAG)
 string.o : string.c
 	$(CC) -c $? -o $@ $(CC-FLAG)
+interrupt.o : interrupt.c
+	$(CC) -c $? -o $@ $(CC-FLAG)
 clean :
 	rm *.bin *.o kernel bootKernel

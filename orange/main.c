@@ -1,4 +1,4 @@
-#include "help.h"
+#include "global.h"
 #include "string.h"
 
 KernelConfig kernelConfig;
@@ -13,7 +13,7 @@ void log(char *s);
 int main() {
     char *video = (char*)0xB8000;
 
-    *video = 'X';
+    *video = 'S';
 
     kernelConfig.cursorCurrentCol = 0;
     kernelConfig.cursorCurrentRow = 0;
@@ -21,6 +21,9 @@ int main() {
     kernelConfig.screenMaxRow = 50;
 
     init_memery();
+    init_interrrupt();
+
+    int a =1/0;
 
     while (1) {
     };
@@ -28,15 +31,9 @@ int main() {
     return 0;
 }
 
-void log(char *s)
+void init_interrrupt()
 {
-    char *video = (char*)0xB8000 + (kernelConfig.cursorCurrentRow*kernelConfig.screenMaxCol+kernelConfig.cursorCurrentCol)*2;
     
-    for (int i=0; s[i] != '\0'; i++) {
-        *video = s[i];
-        video += 2;
-    }
-    kernelConfig.cursorCurrentRow++;
 }
 
 void init_console()
@@ -56,7 +53,7 @@ void init_memery()
     long long t;
 
     memset(a, 0, 100);
-    strcat(a, "ards count:");
+    strcat(a, "rds count:");
     itoa(count, b, 10);
     strcat(a,b);
     log(a);

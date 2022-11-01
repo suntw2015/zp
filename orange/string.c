@@ -1,4 +1,5 @@
 #include "string.h"
+#include "global.h"
 
 int strlen(char *s)
 {
@@ -61,4 +62,33 @@ void itoa(long long num,char* str,int radix)
         str[j]=str[i-1+k-j];
         str[i-1+k-j]=temp;
     }
+}
+
+void log(char *s)
+{
+    char *video = (char*)0xB8000 + (kernelConfig.cursorCurrentRow*kernelConfig.screenMaxCol+kernelConfig.cursorCurrentCol)*2;
+    
+    for (int i=0; s[i] != '\0'; i++) {
+        *video = s[i];
+        video += 2;
+    }
+    kernelConfig.cursorCurrentRow++;
+}
+
+void logInt(int v) {
+    char tmp[30];
+    memset(tmp, 0, 30);
+    int i=0;
+    while (v) {
+        tmp[i++] = v%10;
+        v /=10;
+    }
+
+    char t;
+    for (int j=0;j<i;j++,i--) {
+        t=tmp[i];
+        tmp[i]=tmp[j];
+        tmp[j]=t;
+    }
+    log(tmp);
 }
